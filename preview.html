@@ -622,6 +622,89 @@
     .reveal.visible { opacity: 1; transform: translateY(0); }
     .d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; }
     .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+    /* ── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 900px) {
+      /* Nav */
+      nav { padding: 18px 24px; }
+      .nav-links { display: none; }
+      .nav-clock { display: none; }
+
+      /* Hero */
+      .hero-content {
+        grid-template-columns: 1fr;
+        padding: 0 24px;
+        gap: 40px;
+      }
+      .hero-title { font-size: clamp(56px, 14vw, 88px); letter-spacing: -3px; }
+      .hero-right { justify-content: flex-start; }
+      .watch-face { width: 260px; height: 260px; }
+      .watch-inner { inset: 14px; }
+      .sketch-tag { display: none; }
+      .ruler { display: none; }
+      .orbit-dot { transform-origin: 130px 0; }
+      .hero-scroll-hint { left: 24px; }
+
+      /* Marquee */
+      .marquee-item { padding: 0 18px; font-size: 10px; }
+
+      /* Products */
+      .section-head { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 16px; }
+      .products-scroll { padding: 8px 24px 20px; }
+      .product-card { flex: 0 0 260px; }
+      .card-img { height: 200px; }
+
+      /* About */
+      .about-section {
+        grid-template-columns: 1fr;
+        padding: 60px 24px;
+        gap: 40px;
+      }
+      .precision-row { flex-wrap: wrap; gap: 12px; }
+
+      /* Categories */
+      .cat-section { padding: 0 24px 80px; }
+      .cat-grid { grid-template-columns: 1fr; }
+      .cat-card { min-height: 200px; padding: 32px; }
+      .cat-emoji { font-size: 48px; top: 20px; right: 24px; }
+
+      /* Process */
+      .process-section { padding: 70px 24px; }
+      .process-grid {
+        grid-template-columns: 1fr 1fr;
+        border-radius: 12px;
+      }
+      .process-step:nth-child(2) { border-right: none; }
+      .process-step:nth-child(3) { border-top: 1px solid var(--border); }
+      .process-step:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
+
+      /* CTA */
+      .cta-section { padding: 80px 24px; }
+      .cta-title { letter-spacing: -1px; }
+
+      /* Footer */
+      footer { padding: 28px 24px; flex-direction: column; gap: 20px; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; gap: 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: clamp(44px, 18vw, 64px); letter-spacing: -2px; }
+      .hero-tagline { font-size: 10px; flex-wrap: wrap; gap: 6px; }
+      .hero-btn { width: 100%; justify-content: center; }
+      .watch-face { width: 220px; height: 220px; }
+
+      /* Tek kolon process */
+      .process-grid { grid-template-columns: 1fr; }
+      .process-step { border-right: none !important; border-top: 1px solid var(--border); }
+      .process-step:first-child { border-top: none; }
+
+      /* About skills 1 kolon */
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .about-watch-mini { flex-direction: column; text-align: center; }
+
+      .sec-title { letter-spacing: -1px; }
+      .about-title { letter-spacing: -0.5px; }
+    }
   </style>
 </head>
 <body>
