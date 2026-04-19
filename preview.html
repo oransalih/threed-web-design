@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KATMAN — Hacı Arda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #07070A;
+      --bg2:    #0F0F16;
+      --purple: #9B6DFF;
+      --pink:   #FF4D9E;
+      --cyan:   #00D4FF;
+      --gold:   #FFB520;
+      --text:   #EDEDEA;
+      --muted:  #6B6B80;
+      --border: rgba(255,255,255,0.07);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden; cursor: none;
+    }
+
+    /* ── GRAIN ─────────────────────────────────── */
+    .noise {
+      position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+    }
+
+    /* ── CURSOR — kalem ucu ─────────────────────── */
+    .cursor {
+      position: fixed; width: 4px; height: 20px;
+      background: var(--purple); border-radius: 2px;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      transform-origin: center center;
+      transition: background 0.2s;
+    }
+    .cursor-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(155,109,255,0.45); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%, -50%);
+    }
+
+    /* ── NAV ───────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 60px;
+    }
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px; font-weight: 700; letter-spacing: 3px;
+      color: var(--text); text-decoration: none; text-transform: uppercase;
+    }
+    .nav-logo span { color: var(--purple); }
+
+    /* Canlı saat — nav sağında */
+    .nav-clock {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      color: var(--muted); letter-spacing: 1px;
+    }
+    .clock-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--purple);
+      animation: pulse-dot 1s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+    #liveClock { color: var(--text); }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 13px;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border); padding: 9px 20px;
+      border-radius: 100px; font-size: 13px; font-weight: 500;
+      cursor: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-cta:hover { border-color: var(--purple); color: var(--purple); }
+
+    /* ── HERO ──────────────────────────────────── */
+    .hero {
+      position: relative; height: 100vh; min-height: 700px;
+      display: flex; align-items: center; overflow: hidden;
+    }
+    #particles { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+    /* Blueprint grid overlay */
+    .blueprint-grid {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(155,109,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(155,109,255,0.04) 1px, transparent 1px),
+        linear-gradient(rgba(155,109,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(155,109,255,0.015) 1px, transparent 1px);
+      background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+    }
+
+    .hero-glow {
+      position: absolute; border-radius: 50%; pointer-events: none; filter: blur(130px);
+    }
+    .glow-1 { width: 550px; height: 550px; background: var(--purple); opacity: 0.08; top: -100px; left: -80px; }
+    .glow-2 { width: 350px; height: 350px; background: var(--pink);   opacity: 0.07; bottom: -60px; right: 80px; }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 60px; width: 100%; max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+
+    .hero-eyebrow {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--muted); font-size: 11px; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px;
+      font-family: 'DM Mono', monospace;
+    }
+    .eyebrow-line { width: 24px; height: 1px; background: var(--purple); }
+
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(64px, 9vw, 120px);
+      font-weight: 700; line-height: 0.92; letter-spacing: -4px;
+      margin-bottom: 28px;
+    }
+    .hero-title .t1 { display: block; color: var(--text); }
+    .hero-title .t2 {
+      display: block; color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.18);
+      transition: -webkit-text-stroke-color 0.3s;
+    }
+    .hero-title .t2:hover { -webkit-text-stroke-color: var(--purple); }
+    .hero-title .t3 {
+      display: block; color: transparent;
+      -webkit-text-stroke: 1px rgba(155,109,255,0.35);
+    }
+
+    .hero-sub {
+      color: var(--muted); font-size: 15px; line-height: 1.8;
+      max-width: 400px; margin-bottom: 32px;
+    }
+    .hero-sub strong { color: var(--text); font-weight: 500; }
+
+    /* Tagline: saat teması */
+    .hero-tagline {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border);
+    }
+    .tagline-tick { color: var(--purple); }
+
+    .hero-btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--purple); color: #fff; padding: 14px 30px;
+      border-radius: 100px; border: none; font-size: 14px; font-weight: 600;
+      cursor: none; font-family: 'Inter', sans-serif;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .hero-btn:hover { transform: translateY(-2px); background: #8B5CF6; }
+    .hero-btn .btn-arrow {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+
+    /* ── WATCH CLOCK — sağ panel ─────────────────── */
+    .hero-right {
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    /* Saat kadranı */
+    .watch-face {
+      position: relative; width: 340px; height: 340px;
+    }
+    .watch-outer {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 1px solid rgba(155,109,255,0.2);
+      box-shadow: 0 0 40px rgba(155,109,255,0.06), inset 0 0 60px rgba(155,109,255,0.03);
+    }
+    .watch-inner {
+      position: absolute; inset: 18px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      background: radial-gradient(circle at 40% 35%, rgba(155,109,255,0.08), transparent 60%),
+                  radial-gradient(circle at 60% 65%, rgba(255,77,158,0.05), transparent 50%),
+                  #0A0A10;
+      overflow: hidden;
+    }
+
+    /* Tick marks — saat çizgileri */
+    .tick {
+      position: absolute; top: 50%; left: 50%;
+      transform-origin: 0 0;
+    }
+    .tick-line {
+      position: absolute; width: 1px;
+      background: rgba(255,255,255,0.12);
+      transform-origin: bottom center;
+      bottom: 50%; left: 50%;
+    }
+    .tick-major { height: 14px; background: rgba(155,109,255,0.5); width: 1.5px; }
+    .tick-minor { height: 7px; }
+
+    /* Saat akrep/yelkovan/saniye */
+    .hand {
+      position: absolute; bottom: 50%; left: 50%;
+      transform-origin: bottom center;
+      border-radius: 4px 4px 2px 2px;
+    }
+    .hand-hour {
+      width: 3px; height: 25%;
+      background: var(--text); margin-left: -1.5px;
+      box-shadow: 0 0 8px rgba(155,109,255,0.4);
+    }
+    .hand-min {
+      width: 2px; height: 33%;
+      background: var(--purple); margin-left: -1px;
+      box-shadow: 0 0 8px rgba(155,109,255,0.5);
+    }
+    .hand-sec {
+      width: 1px; height: 38%;
+      background: var(--pink); margin-left: -0.5px;
+    }
+    .hand-sec::after {
+      content: ''; position: absolute; bottom: -16px; left: 50%;
+      transform: translateX(-50%);
+      width: 5px; height: 16px; background: var(--pink); border-radius: 1px;
+    }
+    .watch-center {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--purple); top: 50%; left: 50%;
+      transform: translate(-50%, -50%); z-index: 10;
+      box-shadow: 0 0 10px var(--purple);
+    }
+
+    /* Marka yazısı saat içinde */
+    .watch-brand {
+      position: absolute; top: 32%; left: 50%; transform: translateX(-50%);
+      font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500;
+      color: rgba(255,255,255,0.2); letter-spacing: 3px; text-transform: uppercase;
+      text-align: center; white-space: nowrap;
+    }
+    .watch-sub {
+      position: absolute; top: 40%; left: 50%; transform: translateX(-50%);
+      font-family: 'DM Mono', monospace; font-size: 7px;
+      color: rgba(155,109,255,0.4); letter-spacing: 2px;
+      text-align: center; white-space: nowrap;
+    }
+
+    /* Tarih penceresi */
+    .watch-date {
+      position: absolute; right: 28%; top: 50%; transform: translateY(-50%);
+      background: rgba(155,109,255,0.12); border: 1px solid rgba(155,109,255,0.2);
+      padding: 2px 6px; border-radius: 2px;
+      font-family: 'DM Mono', monospace; font-size: 9px; color: var(--purple);
+      letter-spacing: 1px;
+    }
+
+    /* Dış halkada dönen nokta */
+    .orbit-dot {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--purple); box-shadow: 0 0 8px var(--purple);
+      top: 50%; left: 50%; margin: -3px;
+      transform-origin: 170px 0;
+      animation: orbit 8s linear infinite;
+    }
+    .orbit-dot-2 {
+      background: var(--pink); box-shadow: 0 0 8px var(--pink);
+      animation: orbit 12s linear infinite reverse;
+      transform-origin: 170px 0;
+    }
+    @keyframes orbit { to { transform: rotate(360deg); } }
+
+    /* Floating sketches / çizim detayları */
+    .sketch-tag {
+      position: absolute;
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--muted); letter-spacing: 1px; white-space: nowrap;
+    }
+    .sketch-tag::before { content: '// '; color: rgba(155,109,255,0.4); }
+    .st1 { top: 10px;  left: -60px; }
+    .st2 { bottom: 30px; right: -50px; }
+    .st3 { top: 50%; right: -80px; transform: translateY(-50%); }
+
+    /* Ruler ticks sol kenar */
+    .ruler {
+      position: absolute; left: -40px; top: 0; bottom: 0;
+      width: 20px; display: flex; flex-direction: column; justify-content: space-between;
+      padding: 20px 0;
+    }
+    .ruler-tick {
+      width: 100%; display: flex; align-items: center; gap: 4px;
+      font-family: 'DM Mono', monospace; font-size: 7px; color: rgba(155,109,255,0.25);
+    }
+    .ruler-tick::before { content: ''; flex: 1; height: 1px; background: rgba(155,109,255,0.15); }
+
+    /* ── SCROLL + COUNTER ─────────────────────── */
+    .hero-scroll-hint {
+      position: absolute; bottom: 32px; left: 60px; z-index: 2;
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 40px; height: 1px; background: var(--purple);
+      animation: expand 2s ease-in-out infinite;
+    }
+    @keyframes expand { 0%,100% { width: 40px; } 50% { width: 64px; } }
+
+    /* ── MARQUEE ───────────────────────────────── */
+    .marquee-wrap {
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      overflow: hidden; padding: 16px 0; background: var(--bg2);
+    }
+    .marquee-track {
+      display: flex; animation: marquee 24s linear infinite; width: max-content;
+    }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+    .marquee-item {
+      display: flex; align-items: center; gap: 18px; padding: 0 28px;
+      font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 400;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+    }
+    .mdot { color: var(--purple); font-size: 16px; }
+
+    /* ── PRODUCTS ──────────────────────────────── */
+    .products-section { padding: 110px 0; }
+    .section-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      padding: 0 60px; margin-bottom: 52px;
+    }
+    .eyebrow {
+      font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--purple);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--purple); }
+    .sec-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 3.5vw, 40px); font-weight: 700; letter-spacing: -1.5px;
+    }
+    .view-all {
+      color: var(--muted); text-decoration: none; font-size: 12px; font-family: 'DM Mono', monospace;
+      display: flex; align-items: center; gap: 10px; letter-spacing: 1px; text-transform: uppercase;
+      transition: color 0.2s, gap 0.2s;
+    }
+    .view-all:hover { color: var(--text); gap: 14px; }
+    .val { width: 28px; height: 1px; background: currentColor; transition: width 0.2s; }
+    .view-all:hover .val { width: 44px; }
+
+    .products-scroll {
+      display: flex; gap: 18px; padding: 8px 60px 24px;
+      overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    }
+    .products-scroll::-webkit-scrollbar { display: none; }
+
+    .product-card {
+      flex: 0 0 300px; scroll-snap-align: start;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 18px; overflow: hidden; cursor: none;
+      transition: border-color 0.3s; transform-style: preserve-3d;
+      transform: perspective(800px);
+    }
+    .product-card:hover { border-color: rgba(155,109,255,0.28); }
+
+    .card-img {
+      height: 240px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ci1 { background: linear-gradient(145deg, #120C28 0%, #1E1050 100%); }
+    .ci2 { background: linear-gradient(145deg, #081520 0%, #0A2030 100%); }
+    .ci3 { background: linear-gradient(145deg, #160A1C 0%, #260F36 100%); }
+    .ci4 { background: linear-gradient(145deg, #180A10 0%, #2A0E1A 100%); }
+    .ci5 { background: linear-gradient(145deg, #101020 0%, #181835 100%); }
+    .ci6 { background: linear-gradient(145deg, #160C00 0%, #281800 100%); }
+
+    /* Blueprint corner marks on card images */
+    .bp-corner {
+      position: absolute; width: 12px; height: 12px;
+      border-color: rgba(155,109,255,0.3); border-style: solid;
+      border-width: 0;
+    }
+    .bp-tl { top: 8px;  left: 8px;  border-top-width: 1px; border-left-width: 1px; }
+    .bp-tr { top: 8px;  right: 8px; border-top-width: 1px; border-right-width: 1px; }
+    .bp-bl { bottom: 8px; left: 8px;  border-bottom-width: 1px; border-left-width: 1px; }
+    .bp-br { bottom: 8px; right: 8px; border-bottom-width: 1px; border-right-width: 1px; }
+
+    /* Dimension lines on card */
+    .dim-line {
+      position: absolute; font-family: 'DM Mono', monospace;
+      font-size: 8px; color: rgba(155,109,255,0.25); letter-spacing: 1px;
+    }
+    .dim-h { bottom: 20px; left: 50%; transform: translateX(-50%); }
+    .dim-h::before, .dim-h::after {
+      content: '|'; margin: 0 4px; color: rgba(155,109,255,0.2);
+    }
+
+    .fig {
+      position: relative; z-index: 1;
+      filter: drop-shadow(0 16px 32px rgba(0,0,0,0.7));
+      animation: float-fig 4s ease-in-out infinite;
+    }
+    @keyframes float-fig {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+    .fb { width: 68px; height: 86px; border-radius: 12px 12px 7px 7px; position: relative; box-shadow: inset 0 2px 0 rgba(255,255,255,0.12); }
+    .fh { width: 46px; height: 46px; border-radius: 50%; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); box-shadow: inset 0 2px 0 rgba(255,255,255,0.15); }
+    .fe { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.85); top: 15px; }
+    .fel { left: 10px; } .fer { right: 10px; }
+
+    .ci1 .fb { background: linear-gradient(160deg, #A78BFA, #6D28D9); }
+    .ci1 .fh { background: linear-gradient(160deg, #F9A8D4, #BE185D); }
+    .ci2 .fb { background: linear-gradient(160deg, #67E8F9, #0891B2); }
+    .ci2 .fh { background: linear-gradient(160deg, #86EFAC, #16A34A); }
+    .ci3 .fb { background: linear-gradient(160deg, #E879F9, #9333EA); }
+    .ci3 .fh { background: linear-gradient(160deg, #FCA5A5, #DC2626); }
+    .ci4 .fb { background: linear-gradient(160deg, #FDA4AF, #E11D48); }
+    .ci4 .fh { background: linear-gradient(160deg, #C4B5FD, #7C3AED); }
+    .ci5 .fb { background: linear-gradient(160deg, #A5B4FC, #4338CA); }
+    .ci5 .fh { background: linear-gradient(160deg, #FDE68A, #D97706); }
+    .ci6 .fb { background: linear-gradient(160deg, #FDBA74, #C2410C); }
+    .ci6 .fh { background: linear-gradient(160deg, #D9F99D, #4D7C0F); }
+
+    .pot-wrap { display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 16px 32px rgba(0,0,0,0.7)); animation: float-fig 4.5s ease-in-out infinite; }
+    .pot-rim  { width: 76px; height: 10px; border-radius: 3px 3px 0 0; }
+    .pot-body { width: 64px; height: 76px; border-radius: 0 0 18px 18px; display: flex; align-items: flex-start; justify-content: center; padding-top: 6px; font-size: 22px; }
+
+    .card-glow { position: absolute; width: 70px; height: 70px; border-radius: 50%; filter: blur(28px); opacity: 0; transition: opacity 0.4s; }
+    .product-card:hover .card-glow { opacity: 0.55; }
+    .ci1 .card-glow { background: var(--purple); }
+    .ci2 .card-glow { background: var(--cyan); }
+    .ci3 .card-glow { background: var(--pink); }
+    .ci4 .card-glow { background: var(--pink); }
+    .ci5 .card-glow { background: var(--purple); }
+    .ci6 .card-glow { background: var(--gold); }
+
+    .card-pill {
+      position: absolute; bottom: 14px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(7,7,10,0.88); color: var(--text);
+      border: 1px solid rgba(155,109,255,0.35);
+      padding: 6px 18px; border-radius: 100px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      backdrop-filter: blur(8px); white-space: nowrap;
+    }
+    .product-card:hover .card-pill { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .card-body { padding: 18px 20px 20px; }
+    .card-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .tfig { color: var(--purple); } .tdek { color: var(--cyan); } .tnew { color: var(--gold); }
+    .card-name { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.2px; }
+    .card-desc { color: var(--muted); font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
+    .card-foot { display: flex; align-items: center; justify-content: space-between; }
+    .card-price { font-family: 'Space Grotesk', sans-serif; font-size: 19px; font-weight: 700; }
+    .card-price sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .card-wish {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid var(--border); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: none; color: var(--muted); font-size: 14px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .card-wish:hover { border-color: var(--pink); color: var(--pink); }
+
+    /* ── ABOUT — Arda'nın hikayesi ──────────────── */
+    .about-section {
+      padding: 100px 60px;
+      border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .about-left { position: relative; }
+    .about-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px; position: relative; overflow: hidden;
+    }
+    /* Blueprint corner marks on about card */
+    .about-card::before, .about-card::after {
+      content: '';
+      position: absolute; width: 16px; height: 16px;
+      border-color: rgba(155,109,255,0.2); border-style: solid; border-width: 0;
+    }
+    .about-card::before { top: 12px; left: 12px; border-top-width: 1px; border-left-width: 1px; }
+    .about-card::after  { bottom: 12px; right: 12px; border-bottom-width: 1px; border-right-width: 1px; }
+
+    .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .skill-item {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      transition: border-color 0.2s;
+    }
+    .skill-item:hover { border-color: rgba(155,109,255,0.3); }
+    .skill-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+    .skill-name { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .skill-desc { font-size: 11px; color: var(--muted); line-height: 1.5; font-family: 'DM Mono', monospace; }
+
+    /* Watch detail on about */
+    .about-watch-mini {
+      display: flex; align-items: center; gap: 14px; margin-top: 20px;
+      padding: 14px 18px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .watch-mini-face {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(155,109,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      background: #0A0A12; flex-shrink: 0; position: relative;
+      font-size: 16px;
+    }
+    .watch-mini-info { font-family: 'DM Mono', monospace; }
+    .watch-mini-label { font-size: 9px; color: var(--purple); letter-spacing: 2px; text-transform: uppercase; }
+    .watch-mini-val   { font-size: 12px; color: var(--text); margin-top: 2px; }
+
+    .about-right { display: flex; flex-direction: column; justify-content: center; }
+    .about-right .eyebrow { margin-bottom: 14px; }
+    .about-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(24px, 3vw, 36px); font-weight: 700;
+      letter-spacing: -1px; margin-bottom: 16px; line-height: 1.15;
+    }
+    .about-body { color: var(--muted); font-size: 14px; line-height: 1.85; margin-bottom: 24px; }
+    .about-body strong { color: var(--text); font-weight: 500; }
+
+    /* Precision stat */
+    .precision-row {
+      display: flex; gap: 24px; margin-bottom: 28px;
+    }
+    .prec-item {
+      padding: 14px 18px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; text-align: center;
+    }
+    .prec-num {
+      font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .prec-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+
+    /* ── PROCESS ───────────────────────────────── */
+    .process-section { border-top: 1px solid var(--border); padding: 90px 60px; background: var(--bg2); }
+    .process-inner { max-width: 1200px; margin: 0 auto; }
+    .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-top: 52px; }
+    .process-step {
+      padding: 32px 24px; border-right: 1px solid var(--border);
+      position: relative; overflow: hidden; transition: background 0.3s;
+    }
+    .process-step:last-child { border-right: none; }
+    .process-step:hover { background: rgba(155,109,255,0.03); }
+    .step-num {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--purple);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 18px;
+    }
+    .step-icon { font-size: 26px; margin-bottom: 14px; display: block; }
+    .step-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .step-desc { color: var(--muted); font-size: 12px; line-height: 1.7; }
+    /* Tiny blueprint number */
+    .step-bg-num {
+      position: absolute; top: -8px; right: 8px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 60px; font-weight: 700;
+      color: rgba(155,109,255,0.04); line-height: 1; pointer-events: none;
+    }
+
+    /* ── CTA ───────────────────────────────────── */
+    .cta-section {
+      padding: 120px 60px; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute; width: 500px; height: 300px; border-radius: 50%;
+      background: var(--purple); filter: blur(120px); opacity: 0.07;
+      top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+    }
+    .cta-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--purple); margin-bottom: 20px; }
+    .cta-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700; letter-spacing: -2px; margin-bottom: 14px; line-height: 1.1;
+      position: relative; z-index: 1;
+    }
+    .cta-sub { color: var(--muted); font-size: 14px; margin-bottom: 36px; position: relative; z-index: 1; }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: transparent; color: var(--text);
+      border: 1px solid rgba(155,109,255,0.35); padding: 14px 32px;
+      border-radius: 100px; font-size: 13px; font-weight: 600;
+      cursor: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.3s, background 0.3s;
+      position: relative; z-index: 1;
+    }
+    .cta-btn:hover { background: var(--purple); border-color: var(--purple); }
+
+    /* ── FOOTER ────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border); padding: 32px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-logo { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 2px; }
+    .footer-logo span { color: var(--purple); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 12px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-right { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+    /* ── REVEAL ────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s, transform 0.8s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; }
+    .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+  </style>
+</head>
+<body>
+
+  <div class="noise"></div>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">KAT<span>MAN</span></a>
+    <div class="nav-clock">
+      <div class="clock-dot"></div>
+      <span id="liveClock">--:--:--</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Ürünler</a></li>
+      <li><a href="#">Koleksiyonlar</a></li>
+      <li><a href="#">Hakkımda</a></li>
+    </ul>
+    <button class="nav-cta">Sipariş Ver</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <canvas id="particles"></canvas>
+    <div class="blueprint-grid"></div>
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+
+    <div class="hero-content">
+      <!-- Sol -->
+      <div>
+        <div class="hero-eyebrow">
+          <div class="eyebrow-line"></div>
+          El Yapımı 3D Baskı Sanatı
+        </div>
+        <h1 class="hero-title" id="heroTitle">
+          <span class="t1">KAT</span>
+          <span class="t2">MAN</span>
+          <span class="t3">3D</span>
+        </h1>
+        <div class="hero-tagline">
+          <span class="tagline-tick">⟳</span>
+          <span>Saniye saniye tasarlıyor</span>
+          <span class="tagline-tick">·</span>
+          <span>katman katman üretiyor</span>
+        </div>
+        <p class="hero-sub" id="heroSub">
+          <strong>Hacı Arda</strong> — saatler gibi hassas, çizimler gibi özgün.
+          3D yazıcısından çıkan figürler ve ev dekorasyonları.
+        </p>
+        <button class="hero-btn">
+          Ürünleri Keşfet
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- Sağ — Saat -->
+      <div class="hero-right">
+        <div class="watch-face">
+          <!-- Dış halka -->
+          <div class="watch-outer"></div>
+
+          <!-- Orbit dots -->
+          <div class="orbit-dot" id="orbitDot1"></div>
+          <div class="orbit-dot orbit-dot-2" id="orbitDot2"></div>
+
+          <!-- İç kadran -->
+          <div class="watch-inner" id="watchInner">
+            <div class="watch-brand">KATMAN</div>
+            <div class="watch-sub">HANDMADE · 3D</div>
+            <div class="watch-date" id="watchDate">--</div>
+
+            <!-- Tick marks — JS ile oluşturulacak -->
+            <div id="ticks"></div>
+
+            <!-- Akrep, yelkovan, saniye -->
+            <div class="hand hand-hour" id="handHour"></div>
+            <div class="hand hand-min"  id="handMin"></div>
+            <div class="hand hand-sec"  id="handSec"></div>
+            <div class="watch-center"></div>
+          </div>
+
+          <!-- Sketch comments -->
+          <div class="sketch-tag st1">layer_count: ∞</div>
+          <div class="sketch-tag st2">precision: 0.1mm</div>
+          <div class="sketch-tag st3">material: PLA+</div>
+
+          <!-- Ruler -->
+          <div class="ruler">
+            <div class="ruler-tick">100</div>
+            <div class="ruler-tick">75</div>
+            <div class="ruler-tick">50</div>
+            <div class="ruler-tick">25</div>
+            <div class="ruler-tick">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <div class="scroll-line"></div>
+      <span>Keşfet</span>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <div class="marquee-item">El Yapımı <span class="mdot">·</span></div>
+      <div class="marquee-item">3D Figürler <span class="mdot">·</span></div>
+      <div class="marquee-item">Saat Hassasiyeti <span class="mdot">·</span></div>
+      <div class="marquee-item">Ev Dekorasyonu <span class="mdot">·</span></div>
+      <div class="marquee-item">Çizimden Gerçeğe <span class="mdot">·</span></div>
+      <div class="marquee-item">PLA+ Malzeme <span class="mdot">·</span></div>
+      <div class="marquee-item">Özel Sipariş <span class="mdot">·</span></div>
+      <div class="marquee-item">El Yapımı <span class="mdot">·</span></div>
+      <div class="marquee-item">3D Figürler <span class="mdot">·</span></div>
+      <div class="marquee-item">Saat Hassasiyeti <span class="mdot">·</span></div>
+      <div class="marquee-item">Ev Dekorasyonu <span class="mdot">·</span></div>
+      <div class="marquee-item">Çizimden Gerçeğe <span class="mdot">·</span></div>
+      <div class="marquee-item">PLA+ Malzeme <span class="mdot">·</span></div>
+      <div class="marquee-item">Özel Sipariş <span class="mdot">·</span></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="products-section">
+    <div class="section-head reveal">
+      <div>
+        <div class="eyebrow">Öne Çıkanlar</div>
+        <h2 class="sec-title">En Sevilen Ürünler</h2>
+      </div>
+      <a href="#" class="view-all"><div class="val"></div> Tümünü Gör</a>
+    </div>
+    <div class="products-scroll">
+
+      <div class="product-card" data-tilt>
+        <div class="card-img ci1">
+          <div class="bp-corner bp-tl"></div><div class="bp-corner bp-tr"></div>
+          <div class="bp-corner bp-bl"></div><div class="bp-corner bp-br"></div>
+          <div class="card-glow"></div>
+          <div class="fig"><div class="fb"><div class="fh"><div class="fe fel"></div><div class="fe fer"></div></div></div></div>
+          <div class="dim-line dim-h">14cm</div>
+          <div class="card-pill">Detayı Gör →</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag tfig">// figür</div>
+          <div class="card-name">Mor Büyücü</div>
+          <div class="card-desc">Mor & altın PLA+, 14cm. Özelleştirilebilir renk.</div>
+          <div class="card-foot"><div class="card-price">₺280<sub>/adet</sub></div><button class="card-wish">♡</button></div>
+        </div>
+      </div>
+
+      <div class="product-card" data-tilt>
+        <div class="card-img ci2">
+          <div class="bp-corner bp-tl"></div><div class="bp-corner bp-tr"></div>
+          <div class="bp-corner bp-bl"></div><div class="bp-corner bp-br"></div>
+          <div class="card-glow"></div>
+          <div class="fig" style="animation-delay:-1.2s"><div class="fb"><div class="fh"><div class="fe fel"></div><div class="fe fer"></div></div></div></div>
+          <div class="dim-line dim-h">12cm</div>
+          <div class="card-pill">Detayı Gör →</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag tnew">// yeni</div>
+          <div class="card-name">Okyanuslu Kaşif</div>
+          <div class="card-desc">Mavi & yeşil geçişli filament, boyalı seçenek var.</div>
+          <div class="card-foot"><div class="card-price">₺320<sub>/adet</sub></div><button class="card-wish">♡</button></div>
+        </div>
+      </div>
+
+      <div class="product-card" data-tilt>
+        <div class="card-img ci3">
+          <div class="bp-corner bp-tl"></div><div class="bp-corner bp-tr"></div>
+          <div class="bp-corner bp-bl"></div><div class="bp-corner bp-br"></div>
+          <div class="card-glow"></div>
+          <div class="pot-wrap" style="animation-delay:-2s">
+            <div class="pot-rim" style="background:linear-gradient(90deg,#C084FC,#9333EA)"></div>
+            <div class="pot-body" style="background:linear-gradient(180deg,#E879F9,#7E22CE)">🌿</div>
+          </div>
+          <div class="dim-line dim-h">8cm ⌀</div>
+          <div class="card-pill">Detayı Gör →</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag tdek">// dekor</div>
+          <div class="card-name">Geometrik Saksı</div>
+          <div class="card-desc">Sukulent için ideal, drenaj delikli, 8cm çap.</div>
+          <div class="card-foot"><div class="card-price">₺150<sub>/adet</sub></div><button class="card-wish">♡</button></div>
+        </div>
+      </div>
+
+      <div class="product-card" data-tilt>
+        <div class="card-img ci4">
+          <div class="bp-corner bp-tl"></div><div class="bp-corner bp-tr"></div>
+          <div class="bp-corner bp-bl"></div><div class="bp-corner bp-br"></div>
+          <div class="card-glow"></div>
+          <div class="fig" style="animation-delay:-0.6s"><div class="fb"><div class="fh"><div class="fe fel"></div><div class="fe fer"></div></div></div></div>
+          <div class="dim-line dim-h">16cm</div>
+          <div class="card-pill">Detayı Gör →</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag tfig">// figür</div>
+          <div class="card-name">Pembe Savaşçı</div>
+          <div class="card-desc">Pembe & mor geçiş filament, 16cm.</div>
+          <div class="card-foot"><div class="card-price">₺350<sub>/adet</sub></div><button class="card-wish">♡</button></div>
+        </div>
+      </div>
+
+      <div class="product-card" data-tilt>
+        <div class="card-img ci5">
+          <div class="bp-corner bp-tl"></div><div class="bp-corner bp-tr"></div>
+          <div class="bp-corner bp-bl"></div><div class="bp-corner bp-br"></div>
+          <div class="card-glow"></div>
+          <div class="fig" style="animation-delay:-1.8s"><div class="fb"><div class="fh"><div class="fe fel"></div><div class="fe fer"></div></div></div></div>
+          <div class="dim-line dim-h">13cm</div>
+          <div class="card-pill">Detayı Gör →</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag tnew">// limited</div>
+          <div class="card-name">Gece Bekçisi</div>
+          <div class="card-desc">Mavi & altın limited seri, 10 adet. 13cm.</div>
+          <div class="card-foot"><div class="card-price">₺295<sub>/adet</sub></div><button class="card-wish">♡</button></div>
+        </div>
+      </div>
+
+      <div class="product-card" data-tilt>
+        <div class="card-img ci6">
+          <div class="bp-corner bp-tl"></div><div class="bp-corner bp-tr"></div>
+          <div class="bp-corner bp-bl"></div><div class="bp-corner bp-br"></div>
+          <div class="card-glow"></div>
+          <div class="pot-wrap" style="animation-delay:-3s">
+            <div class="pot-rim" style="background:linear-gradient(90deg,#FB923C,#EA580C)"></div>
+            <div class="pot-body" style="background:linear-gradient(180deg,#FDBA74,#C2410C)">🌸</div>
+          </div>
+          <div class="dim-line dim-h">18cm</div>
+          <div class="card-pill">Detayı Gör →</div>
+        </div>
+        <div class="card-body">
+          <div class="card-tag tdek">// dekor</div>
+          <div class="card-name">Geometrik Vazo</div>
+          <div class="card-desc">Modern desen, 18cm yükseklik. Amber/turuncu PLA+.</div>
+          <div class="card-foot"><div class="card-price">₺220<sub>/adet</sub></div><button class="card-wish">♡</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ABOUT — Arda'nın 3 tutkusu -->
+  <div style="border-top:1px solid var(--border)">
+    <div class="about-section">
+      <div class="about-left reveal">
+        <div class="about-card">
+          <div class="skills-grid">
+            <div class="skill-item">
+              <span class="skill-icon">⌚</span>
+              <div class="skill-name">Saatler</div>
+              <div class="skill-desc">mekanizma_hassasiyeti<br/>her dişli önemlidir</div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-icon">✏️</span>
+              <div class="skill-name">Çizim</div>
+              <div class="skill-desc">fikir_kağıda_önce<br/>dijitale_sonra</div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-icon">🖨️</span>
+              <div class="skill-name">3D Baskı</div>
+              <div class="skill-desc">katman_0.1mm<br/>sonsuz_form</div>
+            </div>
+            <div class="skill-item">
+              <span class="skill-icon">🔩</span>
+              <div class="skill-name">Maket</div>
+              <div class="skill-desc">prototype_önce<br/>mükemmel_sonra</div>
+            </div>
+          </div>
+          <div class="about-watch-mini">
+            <div class="watch-mini-face">⌚</div>
+            <div class="watch-mini-info">
+              <div class="watch-mini-label">Arda'nın Motto'su</div>
+              <div class="watch-mini-val">"Hassasiyet bir alışkanlıktır."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-right reveal d1">
+        <div class="eyebrow">Sanatçı Hakkında</div>
+        <h2 class="about-title">Çizimden 3D'ye,<br/>fikirden nesneye.</h2>
+        <p class="about-body">
+          <strong>Hacı Arda Ahmet Albayrak</strong> — saatlere duyduğu sevgiyle
+          öğrendiği hassasiyeti, çizim masasında biçimlendirdiği yaratıcılığı
+          ve maket tutkusundan doğan tasarım anlayışını 3D baskıyla buluşturuyor.<br/><br/>
+          Her figür önce kağıda çiziliyor, sonra dijital ortamda modelleniyor,
+          ardından 0.1mm katmanlarla hayat buluyor.
+        </p>
+        <div class="precision-row">
+          <div class="prec-item">
+            <div class="prec-num">0.1mm</div>
+            <div class="prec-label">Katman kalınlığı</div>
+          </div>
+          <div class="prec-item">
+            <div class="prec-num">48+</div>
+            <div class="prec-label">Özgün model</div>
+          </div>
+          <div class="prec-item">
+            <div class="prec-num">∞</div>
+            <div class="prec-label">Renk seçeneği</div>
+          </div>
+        </div>
+        <button class="hero-btn" style="font-size:13px;padding:12px 24px">
+          Hikayemi Oku <span class="btn-arrow" style="width:22px;height:22px;font-size:11px">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESS -->
+  <div class="process-section">
+    <div class="process-inner">
+      <div class="reveal">
+        <div class="eyebrow">Nasıl Çalışır?</div>
+        <h2 class="sec-title">Çizimden kapına,<br/>4 adımda.</h2>
+      </div>
+      <div class="process-grid">
+        <div class="process-step reveal d1">
+          <div class="step-bg-num">01</div>
+          <div class="step-num">— 01</div>
+          <span class="step-icon">✏️</span>
+          <div class="step-title">Çiz & Tasarla</div>
+          <div class="step-desc">Arda önce kağıda çizer. Sonra dijital modele dönüştürür.</div>
+        </div>
+        <div class="process-step reveal d2">
+          <div class="step-bg-num">02</div>
+          <div class="step-num">— 02</div>
+          <span class="step-icon">🎛️</span>
+          <div class="step-title">Özelleştir</div>
+          <div class="step-desc">Renk, boyut, detay — saatçi hassasiyetiyle ayarlanır.</div>
+        </div>
+        <div class="process-step reveal d3">
+          <div class="step-bg-num">03</div>
+          <div class="step-num">— 03</div>
+          <span class="step-icon">🖨️</span>
+          <div class="step-title">Baskı & Boyama</div>
+          <div class="step-desc">Katman katman üretilir, el boyamasıyla detaylandırılır.</div>
+        </div>
+        <div class="process-step reveal d4">
+          <div class="step-bg-num">04</div>
+          <div class="step-num">— 04</div>
+          <span class="step-icon">📦</span>
+          <div class="step-title">Teslim</div>
+          <div class="step-desc">Özenle paketlenir, güvenli kargo ile kapına gelir.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="cta-label reveal">Özel Sipariş</div>
+    <h2 class="cta-title reveal">Hayalindeki figürü<br/>gerçeğe dönüştürelim.</h2>
+    <p class="cta-sub reveal">Karakteri, boyutu ve rengi söyle — Arda çizsin, üretsin.</p>
+    <button class="cta-btn reveal">✉ &nbsp;Sipariş Ver</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">KAT<span>MAN</span></div>
+    <div class="footer-links">
+      <a href="#">Ürünler</a><a href="#">Koleksiyonlar</a>
+      <a href="#">Hakkımda</a><a href="#">Instagram</a>
+    </div>
+    <div class="footer-right">© 2024 Hacı Arda Ahmet Albayrak</div>
+  </footer>
+
+  <script>
+    // ── Custom cursor ─────────────────────────────
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+    (function rf(){ rx+=(mx-rx)*0.09; ry+=(my-ry)*0.09; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(rf); })();
+
+    // ── Live clock — nav + watch ──────────────────
+    function updateTime() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('liveClock').textContent = h+':'+m+':'+s;
+
+      // Tarih penceresi
+      document.getElementById('watchDate').textContent = now.getDate();
+
+      // Akrep / yelkovan / saniye
+      const secDeg  = now.getSeconds() * 6;
+      const minDeg  = now.getMinutes() * 6 + now.getSeconds() * 0.1;
+      const hourDeg = (now.getHours() % 12) * 30 + now.getMinutes() * 0.5;
+
+      document.getElementById('handHour').style.transform = `rotate(${hourDeg}deg)`;
+      document.getElementById('handMin').style.transform  = `rotate(${minDeg}deg)`;
+      document.getElementById('handSec').style.transform  = `rotate(${secDeg}deg)`;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // ── Watch tick marks ──────────────────────────
+    (function buildTicks() {
+      const container = document.getElementById('ticks');
+      const R = 130; // radius for tick placement
+      for (let i = 0; i < 60; i++) {
+        const isMajor = i % 5 === 0;
+        const angle = i * 6; // degrees
+        const rad = (angle - 90) * Math.PI / 180;
+        const len = isMajor ? 12 : 6;
+        const inner = R - len;
+
+        const x1 = 50 + (inner / R) * 50 * Math.cos(rad);
+        const y1 = 50 + (inner / R) * 50 * Math.sin(rad);
+        const x2 = 50 + 50 * Math.cos(rad);
+        const y2 = 50 + 50 * Math.sin(rad);
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;';
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', x1+'%'); line.setAttribute('y1', y1+'%');
+        line.setAttribute('x2', x2+'%'); line.setAttribute('y2', y2+'%');
+        line.setAttribute('stroke', isMajor ? 'rgba(155,109,255,0.55)' : 'rgba(255,255,255,0.1)');
+        line.setAttribute('stroke-width', isMajor ? '1.5' : '0.8');
+        svg.appendChild(line);
+        container.appendChild(svg);
+      }
+    })();
+
+    // ── Particle canvas ───────────────────────────
+    const canvas = document.getElementById('particles');
+    const ctx    = canvas.getContext('2d');
+    let W, H, pts = [], mouse = {x:null,y:null};
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+    resize(); window.addEventListener('resize',resize);
+    document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+    document.addEventListener('mouseleave',()=>{mouse.x=null;mouse.y=null;});
+    class P {
+      constructor(){ this.r(); }
+      r(){ this.x=Math.random()*W; this.y=Math.random()*H; this.vx=(Math.random()-.5)*.35; this.vy=(Math.random()-.5)*.35; this.a=Math.random()*.35+.08; }
+      u(){
+        if(mouse.x!==null){ const dx=this.x-mouse.x,dy=this.y-mouse.y,d=Math.hypot(dx,dy); if(d<90){ const f=(90-d)/90; this.vx+=dx/d*f*.7; this.vy+=dy/d*f*.7; } }
+        this.vx*=.98; this.vy*=.98; this.x+=this.vx; this.y+=this.vy;
+        if(this.x<0||this.x>W||this.y<0||this.y>H) this.r();
+      }
+      d(){ ctx.beginPath(); ctx.arc(this.x,this.y,1,0,Math.PI*2); ctx.fillStyle=`rgba(155,109,255,${this.a})`; ctx.fill(); }
+    }
+    for(let i=0;i<90;i++) pts.push(new P());
+    (function loop(){
+      ctx.clearRect(0,0,W,H);
+      for(let i=0;i<pts.length;i++){
+        pts[i].u(); pts[i].d();
+        for(let j=i+1;j<pts.length;j++){
+          const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+          if(d<100){ ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.strokeStyle=`rgba(155,109,255,${.07*(1-d/100)})`; ctx.lineWidth=.5; ctx.stroke(); }
+        }
+      }
+      requestAnimationFrame(loop);
+    })();
+
+    // ── Parallax ──────────────────────────────────
+    const ht = document.getElementById('heroTitle');
+    const hs = document.getElementById('heroSub');
+    document.addEventListener('mousemove',e=>{
+      const xn=(e.clientX/innerWidth-.5)*2, yn=(e.clientY/innerHeight-.5)*2;
+      ht.style.transform=`translate(${xn*-12}px,${yn*-7}px)`;
+      hs.style.transform=`translate(${xn*-5}px,${yn*-3}px)`;
+    });
+
+    // ── 3D tilt ───────────────────────────────────
+    document.querySelectorAll('[data-tilt]').forEach(c=>{
+      c.addEventListener('mousemove',e=>{
+        const r=c.getBoundingClientRect();
+        const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+        c.style.transition='transform 0.08s ease';
+        c.style.transform=`perspective(700px) rotateY(${x*14}deg) rotateX(${-y*14}deg) translateZ(8px)`;
+      });
+      c.addEventListener('mouseleave',()=>{
+        c.style.transition='transform 0.5s ease'; c.style.transform='perspective(700px) rotateY(0) rotateX(0)';
+      });
+    });
+
+    // ── Scroll reveal ─────────────────────────────
+    const obs = new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); }),{threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html>
